@@ -1,0 +1,6 @@
+.devenv
+.direnv
+.pre-commit-config.yaml
+
+.terraform
+.terraform.lock.hcl
