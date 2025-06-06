@@ -1,0 +1,58 @@
+name: Build Nix Hosts
+
+on:
+  push:
+    paths:
+      - "hosts/**"
+      - "users/**"
+      - "flake.nix"
+      - "flake.lock"
+  pull_request:
+    paths:
+      - "hosts/**"
+      - "users/**"
+      - "flake.nix"
+      - "flake.lock"
+
+jobs:
+  discover-hosts:
+    name: Discover Hosts
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.get-hosts.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            experimental-features = nix-command flakes pipe-operators
+      - name: Get hosts from flake
+        id: get-hosts
+        run: |
+          ALL_HOSTS=$(nix flake show --no-pure-eval --json | jq -r '.nixosConfigurations | keys | .[]' | jq -R . | jq -s . || echo "[]")
+          echo "All hosts from flake: $ALL_HOSTS"
+          {
+            echo 'matrix<<EOF'
+            echo "$ALL_HOSTS"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+  build-hosts:
+    runs-on: ubuntu-latest
+    needs: discover-hosts
+    strategy:
+      fail-fast: false
+      matrix:
+        host: ${{ fromJson(needs.discover-hosts.outputs.matrix) }}
+    name: Build Host ${{ matrix.host }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            experimental-features = nix-command flakes pipe-operators
+
+      - name: Build Host
+        run: nix build --flake .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel --no-link --print-out-paths

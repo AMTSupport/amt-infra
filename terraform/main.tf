@@ -1,11 +1,15 @@
-# module "hudu" {
-#   source = "./hudu"
-#   providers = {
-#     azurerm = azurerm
-#   }
+module "hudu" {
+  source = "./hudu"
+  providers = {
+    azurerm      = azurerm
+    digitalocean = digitalocean
+  }
 
-#   location      = local.preferredLocation
-# }
+  location              = local.preferredLocation
+  secure_subnet         = one(azurerm_virtual_network.secure_vnet.subnet)
+  permitted_ips         = local.permittedIps
+  digitalocean_location = local.digitalocean_location
+}
 
 module "cipp" {
   source = "./cipp"

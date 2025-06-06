@@ -1,5 +1,6 @@
 locals {
-  preferredLocation = "australiaeast"
+  preferredLocation     = "australiaeast"
+  digitalocean_location = "syd1"
 
   permittedIps = split(",", data.sops_file.secrets.data.TRUSTED_IPS)
 

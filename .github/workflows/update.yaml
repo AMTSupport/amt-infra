@@ -1,0 +1,27 @@
+name: Automated Updates
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  update-flake-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            experimental-features = nix-command flakes pipe-operators
+
+      - name: Update flake.lock
+        uses: DeterminateSystems/update-flake-lock@main
+        with:
+          commit-msg: "chore(deps): update flake.lock"
+          pr-title: "Update flake.lock"
+          pr-labels: |
+            dependencies
+            merge-queue
+          token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}

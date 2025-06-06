@@ -1,0 +1,19 @@
+name: Flake Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            experimental-features = nix-command flakes pipe-operators
+
+      - name: Run Checks
+        run: nix flake check --no-pure-eval --allow-import-from-derivation

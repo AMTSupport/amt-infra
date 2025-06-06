@@ -1,6 +1,10 @@
-.devenv
-.direnv
+# Nix
+result
+result-*
+.devenv/
+.direnv/
 .pre-commit-config.yaml
 
+# Terraform
 .terraform
-.terraform.lock.hcl
+.terraform.*

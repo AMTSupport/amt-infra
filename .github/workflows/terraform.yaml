@@ -1,0 +1,32 @@
+name: Terraform Validation
+
+on:
+  push:
+    paths:
+      - "terraform/**"
+      - "flake.nix"
+      - "flake.lock"
+  pull_request:
+    paths:
+      - "terraform/**"
+      - "flake.nix"
+      - "flake.lock"
+
+jobs:
+  validate-terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra_nix_config: |
+            accept-flake-config = true
+            experimental-features = nix-command flakes pipe-operators
+
+      - name: Initialise Terraform
+        working-directory: terraform
+        run: nix develop --no-pure-eval --command "terraform init -input=false"
+
+      - name: Validate Terraform
+        working-directory: terraform
+        run: nix develop --no-pure-eval --command "terraform validate -no-color"
