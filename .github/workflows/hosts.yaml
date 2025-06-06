@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
         with:
-          extra_nix_config: |
+          extra-conf: |
             accept-flake-config = true
             extra-experimental-features = nix-command flakes pipe-operators
       - name: Get hosts from flake
@@ -50,9 +50,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
         with:
-          extra_nix_config: |
+          extra-conf: |
             accept-flake-config = true
-            experimental-features = nix-command flakes pipe-operators
+            extra-experimental-features = nix-command flakes pipe-operators
 
       - name: Build Host
         run: nix build --flake .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel --no-link --print-out-paths
