@@ -26,7 +26,7 @@ jobs:
         with:
           extra_nix_config: |
             accept-flake-config = true
-            experimental-features = nix-command flakes pipe-operators
+            extra-experimental-features = nix-command flakes pipe-operators
       - name: Get hosts from flake
         id: get-hosts
         run: |

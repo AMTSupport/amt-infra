@@ -13,7 +13,7 @@ jobs:
         with:
           extra_nix_config: |
             accept-flake-config = true
-            experimental-features = nix-command flakes pipe-operators
+            extra-experimental-features = nix-command flakes pipe-operators
 
       - name: Run Checks
         run: nix flake check --no-pure-eval --allow-import-from-derivation
