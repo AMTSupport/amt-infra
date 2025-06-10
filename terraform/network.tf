@@ -10,19 +10,6 @@ resource "azurerm_virtual_network" "secure_vnet" {
     address_prefixes  = ["10.0.0.0/24"]
     security_group    = azurerm_network_security_group.secure_security_group.id
     service_endpoints = ["Microsoft.Storage"]
-    # delegation = [
-    #   {
-    #     name = "Microsoft.ContainerInstance"
-    #     service_delegation = [
-    #       {
-    #         name = "Microsoft.ContainerInstance/containerGroups"
-    #         actions = [
-    #           "Microsoft.Network/virtualNetworks/subnets/action",
-    #         ]
-    #       }
-    #     ]
-    #   }
-    # ]
   }
 }
 

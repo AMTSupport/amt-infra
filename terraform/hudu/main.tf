@@ -8,6 +8,14 @@ variable "location" {
   type        = string
 }
 
+variable "dns_zone" {
+  description = "The DNS zone to use for the deployment."
+  type = object({
+    name                = string
+    resource_group_name = string
+  })
+}
+
 variable "permitted_ips" {
   description = "List of IP addresses that are allowed to access SSH or other sentitive things."
   type        = list(string)

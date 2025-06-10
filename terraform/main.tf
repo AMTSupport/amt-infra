@@ -9,6 +9,7 @@ module "hudu" {
   secure_subnet         = one(azurerm_virtual_network.secure_vnet.subnet)
   permitted_ips         = local.permittedIps
   digitalocean_location = local.digitalocean_location
+  dns_zone              = azurerm_dns_zone.amt_root
 }
 
 module "cipp" {
@@ -22,6 +23,3 @@ module "cipp" {
   secure_subnet = one(azurerm_virtual_network.secure_vnet.subnet)
   tenant_id     = local.tenantId
 }
-
-
-
