@@ -1,19 +1,16 @@
 keys:
+  - &terraform "age1hnhtae2rjv3ffrscy0xvwe77gw3adqd25p0alrcu3hpeltp7hpgqhft5te"
   - hosts:
       - &hudu "age1hnhtae2rjv3ffrscy0xvwe77gw3adqd25p0alrcu3hpeltp7hpgqhft5te"
   - admins:
       - &james "age187xlhmks2tcymsnw32jzzxr6lryejma4602e3v0jlrsra5u64pdsxal44a"
 
 creation_rules:
-  - path_regex: ^secrets.yaml$
+  - path_regex: ^terraform/secrets.yaml$
     key_groups:
       - age:
           - *james
-          - *hudu
-
-  - path_regex: ^terraform/secrets.yaml$
-    key_groups:
-      - age: [*james]
+          - *terraform
 
   - path_regex: ^hosts/hudu/secrets.yaml$
     key_groups:
