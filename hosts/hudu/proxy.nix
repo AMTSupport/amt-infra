@@ -25,7 +25,6 @@ in
     email = "admin@amt.com.au";
 
     globalConfig = ''
-      debug
       servers {
         timeouts {
           read_body 10s
@@ -40,7 +39,7 @@ in
 
     # output file ''${config.services.caddy.logDir}/access-''${hostName}.log
     logFormat = ''
-      level DEBUG
+      level INFO
       output stdout
       format filter {
         wrap console
@@ -137,6 +136,20 @@ in
 
       (shared-check) {
         query X-Forwarded-Shared-Access=true
+      }
+    '';
+
+    virtualHosts."cipp.do.amt.com.au".extraConfig = ''
+      import caching
+      import compression
+
+      import init_vars
+      @trusted_request {
+        import trusted_request
+      }
+
+      handle @trusted_request {
+        reverse_proxy https://jolly-mushroom-0bc4a9810.5.azurestaticapps.net
       }
     '';
   };

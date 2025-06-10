@@ -109,7 +109,7 @@ in
     import init_vars
     @trusted_request {
       path /live-store/uploads/*
-      header referer https://hudu.amt.com.au/
+      header referer https://${huduDomain}/
       import trusted_request
     }
 
