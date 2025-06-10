@@ -2,6 +2,7 @@ name: Terraform Validation
 
 on:
   push:
+    branches: ["master"]
     paths:
       - "terraform/**"
       - "flake.nix"

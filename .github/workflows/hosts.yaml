@@ -2,6 +2,7 @@ name: Build Nix Hosts
 
 on:
   push:
+    branches: ["master"]
     paths:
       - "hosts/**"
       - "users/**"
