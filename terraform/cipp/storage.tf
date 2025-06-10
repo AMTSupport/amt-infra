@@ -1,4 +1,3 @@
-
 resource "azurerm_storage_account" "cipp-storage" {
   resource_group_name = azurerm_resource_group.cipp.name
   location            = azurerm_resource_group.cipp.location

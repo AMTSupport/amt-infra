@@ -1,15 +1,9 @@
+# TODO :: This needs to be updated at runtime to point to the latest Hudu Image
 resource "digitalocean_custom_image" "hudu-os-image" {
   name         = "Hudu OS Image"
   distribution = "Unknown OS"
   regions      = ["syd1"]
   url          = "https://nextcloud.racci.dev/s/ZcPtAKgJswzWAom/download"
-
-  lifecycle {
-    create_before_destroy = true
-    replace_triggered_by = [
-      terraform_data.image_version_trigger.output
-    ]
-  }
 }
 
 resource "digitalocean_droplet" "hudu" {

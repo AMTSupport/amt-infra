@@ -4,8 +4,9 @@ resource "digitalocean_firewall" "hudu" {
   droplet_ids = [digitalocean_droplet.hudu.id]
 
   inbound_rule {
-    protocol   = "tcp"
-    port_range = "22"
+    protocol         = "tcp"
+    port_range       = "22"
+    source_addresses = var.permitted_ips
   }
 
   inbound_rule {
@@ -31,10 +32,12 @@ resource "digitalocean_firewall" "hudu" {
   outbound_rule {
     protocol              = "tcp"
     destination_addresses = ["0.0.0.0/0", "::/0"]
+    port_range            = "all"
   }
   outbound_rule {
     protocol              = "udp"
     destination_addresses = ["0.0.0.0/0", "::/0"]
+    port_range            = "all"
   }
 }
 
