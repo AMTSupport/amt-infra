@@ -5,6 +5,13 @@ resource "azurerm_static_web_app" "cipp_web" {
 
   sku_tier = "Standard"
   sku_size = "Standard"
+
+  lifecycle {
+    ignore_changes = [
+      repository_branch,
+      repository_url
+    ]
+  }
 }
 
 resource "azurerm_static_web_app_custom_domain" "amt_domain" {
