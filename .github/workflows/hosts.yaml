@@ -56,4 +56,4 @@ jobs:
             extra-experimental-features = nix-command flakes pipe-operators
 
       - name: Build Host
-        run: nix build --flake .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel --no-link --print-out-paths
+        run: nix build .#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel --no-link --print-out-paths
