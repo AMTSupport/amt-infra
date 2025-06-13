@@ -36,9 +36,9 @@
     };
     postgresqlBackup = {
       enable = true;
-      startAt = "*-*-* 03:00:00";
+      startAt = "*-*-* 17:00:00"; # 3 AM Sydney time
       databases = [ "hudu_production" ];
-      location = "/var/lib/postgresql/backup";
+      location = "/var/lib/postgresql/backup/postgres";
       compression = "zstd";
       compressionLevel = 12;
     };
@@ -80,14 +80,13 @@
   environment.systemPackages = [ pkgs.s3fs ];
   fileSystems."backup" = {
     device = "${lib.getExe' pkgs.s3fs "s3fs"}#backup";
-    mountPoint = config.services.postgresqlBackup.location;
+    mountPoint = "/var/lib/postgresql/backup";
     fsType = "fuse";
     noCheck = true;
     options = [
       "_netdev"
       "allow_other"
       "use_path_request_style"
-      # FIXME :: Use the actual URL
       "url=http://localhost:8081/"
       "passwd_file=${config.sops.secrets."POSTGRES/S3_KEY".path}"
       "umask=0007"

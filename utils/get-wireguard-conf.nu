@@ -40,7 +40,9 @@ def main [
   let private_key = sops decrypt --extract "[\"WIREGUARD\"][\"PRIVATE_KEY\"]" $secret_file
 
   # TODO dynamic
-  let endpoint = "hudu.do.amt.com.au:51820"
+  let hudu_endpoint = get_flake_value $git_root "virtualisation.oci-containers.containers.hudu-app.environment.DOMAIN"
+  let wg_port = get_flake_value $git_root "networking.wireguard.interfaces.wg0.listenPort"
+  let endpoint = "hudu.amt.com.au:51820"
   let gateway = get_flake_value $git_root "networking.wireguard.interfaces.wg0.ips" "builtins.head" | split row '/' | first
   let public_key = sops decrypt --extract "[\"WIREGUARD_PRIVATE_KEY\"]" hosts/hudu/secrets.yaml | wg pubkey
 

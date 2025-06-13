@@ -51,14 +51,6 @@ in
     };
   };
 
-  systemd.network = {
-    networks.wg0 = {
-      networkConfig = {
-        # IPv4Forwarding = true;
-      };
-    };
-  };
-
   networking = {
     firewall = {
       allowedUDPPorts = [ config.networking.wireguard.interfaces.wg0.listenPort ];

@@ -27,14 +27,11 @@ in
       image = "ghcr.io/gaul/s3proxy/container:latest";
 
       environment = {
-        LOG_LEVEL = "debug";
+        # LOG_LEVEL = "debug";
         S3PROXY_ENDPOINT = "http://0.0.0.0:8080";
         S3PROXY_AUTHORIZATION = "aws-v4";
         JCLOUDS_PROVIDER = "azureblob";
         JCLOUDS_AZUREBLOB_AUTH = "azureKey";
-        # S3PROXY_CORS_ALLOW_ORIGINS = "https://${SUBDOMAINS:?err}\\.amt\\.com\\.au";
-        # S3PROXY_CORS_ALLOW_METHODS = "GET HEAD POST PUT DELETE CONNECT OPTIONS PATCH";
-        # S3PROXY_CORS_ALLOW_HEADERS = "Accept Content-Type";
       };
     in
     {
@@ -59,7 +56,7 @@ in
       };
     };
 
-  services.caddy.virtualHosts."s3.do.amt.com.au".extraConfig = ''
+  services.caddy.virtualHosts."s3.amt.com.au".extraConfig = ''
     import caching
     import compression
 
@@ -104,7 +101,7 @@ in
     #	Handle Live Bucket   #
     #<=======================>
 
-    import security
+    # import security
 
     import init_vars
     @trusted_request {
@@ -126,21 +123,22 @@ in
     # TODO :: Assert that the time regex is actually the current date only.
     @shared_icon {
       method GET
-      path_regexp ^\/live-store\/uploads\/account\/1\/shared_logo\/small-a2bc1670a8c9718a511510b6036f3d38\.jpg
+
+      # The company logo comes from this path.
+      path_regexp ^\/live-store\/uploads\/account\/1\/shared_logo\/([a-zA-Z0-9-_]+)\.(png|jpg|jpeg)$
+
       query X-Amz-Algorithm=AWS4-HMAC-SHA256
-      query X-Amz-Credential=s3proxy\/[0-9]{8}\/australiaeast\/s3\/aws4_request
-      query X-Amz-Date=[0-9]{8}T[0-9]{6}Z
+      # query X-Amz-Credential=s3proxy\/[0-9]{8}\/australiaeast\/s3\/aws4_request
+      # query X-Amz-Date=[0-9]{8}T[0-9]{6}Z
       query X-Amz-Expires=900
       query X-Amz-SignedHeaders=host
-      query X-Amz-Signature=([a-z0-9]{64})
+      # query X-Amz-Signature=([a-z0-9]{64})
       header referer https://${huduDomain}/
-      import shared-check
     }
 
     handle @shared_icon {
       reverse_proxy localhost:8080 {
         import proxy
-        import shared_access_tag
       }
     }
   '';

@@ -10,23 +10,27 @@ resource "digitalocean_firewall" "hudu" {
   }
 
   inbound_rule {
-    protocol   = "tcp"
-    port_range = "80"
+    protocol         = "tcp"
+    port_range       = "80"
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   inbound_rule {
-    protocol   = "tcp"
-    port_range = "443"
+    protocol         = "tcp"
+    port_range       = "443"
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   inbound_rule {
-    protocol   = "udp"
-    port_range = "443"
+    protocol         = "udp"
+    port_range       = "443"
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   inbound_rule {
-    protocol   = "udp"
-    port_range = "51820"
+    protocol         = "udp"
+    port_range       = "51820"
+    source_addresses = ["0.0.0.0/0", "::/0"]
   }
 
   outbound_rule {

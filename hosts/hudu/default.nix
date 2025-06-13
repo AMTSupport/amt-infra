@@ -41,6 +41,12 @@
     };
   };
 
-  networking.hostName = "hudu";
+  networking = {
+    hostName = "hudu";
+    # TODO - Dynamic from terraform output
+    interfaces.ens3.ipv4.addresses = [
+      "170.64.244.223"
+    ];
+  };
   system.stateVersion = "25.05";
 }

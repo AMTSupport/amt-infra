@@ -5,7 +5,6 @@
   ...
 }:
 let
-  # Workaround using nix until https://github.com/caddyserver/caddy/issues/7048 works
   numOfAllowedProxies = 7;
 in
 {
@@ -34,20 +33,6 @@ in
         }
 
         max_header_size 16384
-      }
-    '';
-
-    # output file ''${config.services.caddy.logDir}/access-''${hostName}.log
-    logFormat = ''
-      level INFO
-      output stdout
-      format filter {
-        wrap console
-        fields {
-          request>remote_port delete
-          request>headers>Upgrade-Insecure-Requests delete
-          user_id delete
-        }
       }
     '';
 
@@ -98,8 +83,8 @@ in
         try_files {path} {path}/ /index.*
 
         @failed_security <<CEL
-          path_regexp('\\.(php|pl|py|cgi|sh|bat|yml|js)$')
-          || path_regexp('/\\.github|cache|bin|logs|test.*|content|core|js|css|php|config|lib|rel|priv|tracker/.*$')
+          path_regexp('\\.(php|pl|py|cgi|sh|bat|yml)$')
+          || path_regexp('/\\.github|cache|bin|logs|test.*|content|core|php|config|lib|rel|priv|tracker/.*$')
           || path_regexp('/(core|content|test|system|vendor)/.*\\.(txt|xml|md|html|yaml|php|pl|py|cgi|twig|sh|bat|yml|js)$')
           || path_regexp('(/|^)\\.[A-z0-9-/\\.+_]+$')
           || path_regexp('\\.(log|rg)$')
@@ -137,9 +122,33 @@ in
       (shared-check) {
         query X-Forwarded-Shared-Access=true
       }
+
+      (cors) {
+        @cors_preflight{args[0]} method OPTIONS
+        @cors{args[0]} header Origin {args[0]}
+
+        handle @cors_preflight{args[0]} {
+          header {
+            Access-Control-Allow-Origin "{args[0]}"
+            Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            Access-Control-Allow-Headers *
+            Access-Control-Max-Age "3600"
+            defer
+          }
+          respond "" 204
+        }
+
+        handle @cors{args[0]} {
+          header {
+            Access-Control-Allow-Origin "{args[0]}"
+            Access-Control-Expose-Headers *
+            defer
+          }
+        }
+      }
     '';
 
-    virtualHosts."cipp.do.amt.com.au".extraConfig = ''
+    virtualHosts."cipp.amt.com.au".extraConfig = ''
       import caching
       import compression
 

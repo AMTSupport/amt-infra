@@ -56,8 +56,8 @@ in
           STAGING = "false";
           DISABLE_SSL = "true";
 
-          DOMAIN = "hudu.do.amt.com.au";
-          URL = "do.amt.com.au";
+          DOMAIN = "hudu.amt.com.au";
+          URL = "amt.com.au";
           SUBDOMAINS = "hudu";
 
           RAILS_ENV = "production";
@@ -77,7 +77,7 @@ in
 
           USE_LOCAL_FILESYSTEM = "false";
           S3_FORCE_PATH_STYLE = "true";
-          S3_ENDPOINT = "https://s3.do.amt.com.au/";
+          S3_ENDPOINT = "https://s3.amt.com.au/";
         };
       in
       rec {
@@ -159,48 +159,18 @@ in
 
       import security
 
-      # @shared_access expression <<CEL
-      #   ({method} == "GET"
-      #     && (path_regexp("^/shared(_article)?/([a-zA-Z0-9]+){24}")
-      #     || path_regexp("^/secure_notes/([0-9]+)")))
+      @shared_access expression <<CEL
+        ({method} == "GET"
+          && (path_regexp("^/shared(_article)?/([a-zA-Z0-9]+){24}")
+            || (path_regexp("^/secure_notes/([0-9]+)") && matches({query.key}, "^[a-zA-Z0-9]{40}$")
+        )))
 
-      #   || ({method} == "POST"
-      #     && (path_regexp("^/secure_notes/([0-9]+)/reveal")))
-      # CEL
+        || ({method} == "POST"
+          && (path_regexp("^/secure_notes/([0-9]+)/reveal")))
+      CEL
 
-      @shared_page {
-        method GET
-        path_regexp /shared(_article)?/([a-zA-Z0-9]+){24}
-      }
-
-      handle @shared_page {
+      handle @shared_access {
         reverse_proxy localhost:3000 {
-          import shared_access_tag
-          import proxy
-        }
-      }
-
-      @shared_note {
-        method GET
-        path_regexp /secure_notes/([0-9]+)
-        vars_regexp key {query.key} [a-zA-Z0-9]{40}
-      }
-
-      @shared_reveal {
-        method POST
-        path_regexp /secure_notes/([0-9]+)/reveal
-      }
-
-      handle @shared_note {
-        reverse_proxy localhost:3000 {
-          import shared_access_tag
-          import proxy
-        }
-      }
-
-      handle @shared_reveal {
-        reverse_proxy localhost:3000 {
-          import shared_access_tag
           import proxy
         }
       }
@@ -211,7 +181,7 @@ in
         # Only allow access to hudu assets that are used on the shared page.
         # The assets contain no sensitive information, and are shipped with hudu itself.
         # These assets are the javascript file which controls the password show button, the css file to control the page layout, the favicon and the font files.
-        path_regexp /app_assets/(([a-zA-Z0-9-]+)\.(css|js|ttf|woff2|png)|2x/favicon@2x-([a-z0-9]+).png)
+        path_regexp (/cable|/app_assets/(([a-zA-Z0-9-]+)\.(css|js|ttf|woff2|png)|2x/favicon@2x-([a-z0-9]+).png))
 
         # Only allow requests that are coming from the shared page itself, or the css asset.
         header_regexp referer https://${huduDomain}/(${
@@ -221,14 +191,11 @@ in
             "app_assets/([a-zA-Z0-9-]+)\.(css)"
           ]
         })
-
-        import shared-check
       }
 
       handle @shared_asset_request {
         reverse_proxy localhost:3000 {
           import proxy
-          import shared_access_tag
         }
       }
 
