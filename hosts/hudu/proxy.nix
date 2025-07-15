@@ -27,12 +27,7 @@ in
       servers {
         timeouts {
           read_body 10s
-          read_header 10s
-          write 10s
-          idle 2m
         }
-
-        max_header_size 16384
       }
     '';
 
@@ -44,7 +39,20 @@ in
       }
 
       (compression) {
-        encode zstd gzip
+        encode {
+          zstd gzip
+          match {
+            header Content-Type image/*
+            header Content-Type text/*
+            header Content-Type video/*
+            header Content-Type application/javascript*
+            header Content-Type application/json*
+            header Content-Type application/xml*
+            header Content-Type application/font*
+            header Content-Type application/otf*
+            header Content-Type application/ttf*
+          }
+        }
       }
 
       (init_vars) {
@@ -101,7 +109,6 @@ in
 
       (proxy) {
       	header_up X-Real-IP {remote}
-      	header_down X-Powered-By "The Holy Spirit"
       }
 
       (error-handler) {
@@ -149,7 +156,6 @@ in
     '';
 
     virtualHosts."cipp.amt.com.au".extraConfig = ''
-      import caching
       import compression
 
       import init_vars
