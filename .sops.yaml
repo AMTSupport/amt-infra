@@ -1,5 +1,5 @@
 keys:
-  - &terraform "age1hnhtae2rjv3ffrscy0xvwe77gw3adqd25p0alrcu3hpeltp7hpgqhft5te"
+  - &terraform "age16a2hgx9t2tefvwy2eqfrs4fw0sz27mclejl4805c0gs08maqzc2sv40d0v"
   - hosts:
       - &hudu "age1hnhtae2rjv3ffrscy0xvwe77gw3adqd25p0alrcu3hpeltp7hpgqhft5te"
   - admins:
