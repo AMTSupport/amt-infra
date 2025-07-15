@@ -45,7 +45,13 @@
     hostName = "hudu";
     # TODO - Dynamic from terraform output
     interfaces.ens3.ipv4.addresses = [
-      "170.64.244.223"
+      # {
+      #   prefixLength = 20;
+      # }
+      {
+        address = "170.64.244.223";
+        prefixLength = 32;
+      }
     ];
   };
   system.stateVersion = "25.05";
