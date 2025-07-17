@@ -25,7 +25,14 @@ in
     email = "admin@amt.com.au";
 
     globalConfig = ''
-      servers {
+      servers :443 {
+        protocols h1 h2
+
+        listener_wrappers {
+            http_redirect
+            tls
+        }
+
         timeouts {
           read_body 10s
         }
