@@ -1,11 +1,12 @@
 {
+  flake,
   config,
   pkgs,
   lib,
   ...
 }:
 let
-  numOfAllowedProxies = 7;
+  numOfAllowedProxies = builtins.readDir "${flake}/users" |> builtins.attrValues |> builtins.length;
 in
 {
   sops.secrets =
@@ -40,7 +41,8 @@ in
 
       (compression) {
         encode {
-          zstd gzip
+          zstd
+          gzip
           match {
             header Content-Type image/*
             header Content-Type text/*
