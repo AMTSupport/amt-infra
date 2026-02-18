@@ -7,17 +7,35 @@
 }:
 let
   numOfAllowedProxies = builtins.readDir "${flake}/users" |> builtins.attrValues |> builtins.length;
+
+  caddyOwnedSecret = {
+    owner = config.users.users.caddy.name;
+    inherit (config.users.users.caddy) group;
+  };
+
+  proxyIpSecrets =
+    config.sops.secrets
+    |> builtins.attrNames
+    |> builtins.filter (name: (builtins.match "PROXY_IPS/.*" name) != null)
+    |> map (
+      name:
+      let
+        split = lib.splitString "/" name;
+        secretName = builtins.elemAt split 1;
+      in
+      secretName
+    );
 in
 {
-  sops.secrets =
+  sops.secrets = {
+    "PROXY_IPS/CIPP" = caddyOwnedSecret;
+  }
+  // (
     (builtins.genList (
-      i:
-      lib.nameValuePair "PROXY_IPS/${toString i}" {
-        owner = config.users.users.caddy.name;
-        inherit (config.users.users.caddy) group;
-      }
+      i: lib.nameValuePair "PROXY_IPS/${toString i}" caddyOwnedSecret
     ) numOfAllowedProxies)
-    |> builtins.listToAttrs;
+    |> builtins.listToAttrs
+  );
 
   services.caddy = {
     enable = true;
@@ -66,17 +84,16 @@ in
 
       (init_vars) {
         ${
-          builtins.genList (
-            i: "vars PROXY_IP_${toString i} `{file.${config.sops.secrets."PROXY_IPS/${toString i}".path}}`"
-          ) numOfAllowedProxies
+          map (
+            name: "vars PROXY_IP_${name} `{file.${config.sops.secrets."PROXY_IPS/${name}".path}}`"
+          ) proxyIpSecrets
           |> builtins.concatStringsSep "\n"
         }
       }
       (trusted_request) {
         expression <<CEL
         client_ip('10.100.0.1/24', ${
-          builtins.genList (i: "{vars.PROXY_IP_${toString i}}") numOfAllowedProxies
-          |> builtins.concatStringsSep ","
+          map (name: "{vars.PROXY_IP_${name}}") proxyIpSecrets |> builtins.concatStringsSep ","
         })
         CEL
       }

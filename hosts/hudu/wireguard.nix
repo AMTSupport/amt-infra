@@ -9,21 +9,20 @@ let
   users = builtins.readDir "${flake}/users" |> builtins.attrNames;
 in
 {
-  sops.secrets =
-    {
-      WIREGUARD_PRIVATE_KEY = { };
-    }
-    // (
-      users
-      |> builtins.map (
-        user:
-        lib.nameValuePair "${user}/WIREGUARD_PSK" {
-          sopsFile = "${flake}/users/${user}/secrets.yaml";
-          key = "WIREGUARD/PRE_SHARED_KEY";
-        }
-      )
-      |> builtins.listToAttrs
-    );
+  sops.secrets = {
+    WIREGUARD_PRIVATE_KEY = { };
+  }
+  // (
+    users
+    |> builtins.map (
+      user:
+      lib.nameValuePair "${user}/WIREGUARD_PSK" {
+        sopsFile = "${flake}/users/${user}/secrets.yaml";
+        key = "WIREGUARD/PRE_SHARED_KEY";
+      }
+    )
+    |> builtins.listToAttrs
+  );
 
   services = {
     resolved = {
