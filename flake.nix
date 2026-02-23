@@ -63,6 +63,28 @@
               };
 
               modules = [
+                # Compatibility shim for systemd.settings (available in newer nixpkgs
+                # but not in nixos-25.05). Needed by the latest srvos which uses
+                # systemd.settings.Manager for watchdog configuration.
+                (
+                  { config, lib, ... }:
+                  {
+                    options.systemd.settings = lib.mkOption {
+                      type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
+                      default = { };
+                    };
+                    config = lib.mkIf (config.systemd.settings != { }) {
+                      systemd.extraConfig = lib.concatStringsSep "\n" (
+                        lib.concatLists (
+                          lib.mapAttrsToList (
+                            _section: values: lib.mapAttrsToList (key: value: "${key}=${value}") values
+                          ) config.systemd.settings
+                        )
+                      );
+                    };
+                  }
+                )
+
                 inputs.srvos.nixosModules.server
                 inputs.srvos.nixosModules.hardware-digitalocean-droplet
                 inputs.srvos.nixosModules.mixins-trusted-nix-caches
@@ -103,8 +125,18 @@
                 hclfmt.enable = true;
                 mdformat.enable = true;
                 mdsh.enable = true;
-                nixf-diagnose.enable = true;
-                nixfmt.enable = true;
+                nixf-diagnose = {
+                  enable = true;
+                  # Newer treefmt-nix passes --auto-fix by default, but nixf-diagnose
+                  # in nixos-25.05 doesn't support this flag yet.
+                  autoFix = false;
+                };
+                nixfmt = {
+                  enable = true;
+                  # Newer treefmt-nix changed from nixfmt-rfc-style to nixfmt (classic),
+                  # which doesn't support the pipe operator |> used in this codebase.
+                  package = pkgs.nixfmt-rfc-style;
+                };
                 prettier.enable = true;
                 shellcheck.enable = true;
                 # Disabled until https://github.com/oppiliappan/statix/issues/88 is resolved
@@ -156,7 +188,10 @@
                 };
               };
 
-              git-hooks.hooks = {
+              git-hooks = {
+                # Newer devenv defaults to pkgs.prek which isn't available in nixos-25.05
+                package = pkgs.pre-commit;
+                hooks = {
                 check-added-large-files.enable = true;
                 check-case-conflicts.enable = true;
                 check-executables-have-shebangs.enable = true;
@@ -180,9 +215,9 @@
                   enable = true;
                   package = config.treefmt.build.wrapper;
                 };
+                };
               };
             };
-          };
       }
     );
 }
