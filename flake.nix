@@ -68,18 +68,18 @@
                 # systemd.settings.Manager for watchdog configuration.
                 (
                   { config, lib, ... }:
+                  let
+                    managerSettings = config.systemd.settings.Manager or { };
+                  in
                   {
                     options.systemd.settings = lib.mkOption {
                       type = lib.types.attrsOf (lib.types.attrsOf lib.types.str);
                       default = { };
                     };
-                    config = lib.mkIf (config.systemd.settings != { }) {
+                    # systemd.extraConfig is placed inside the [Manager] section of system.conf
+                    config = lib.mkIf (managerSettings != { }) {
                       systemd.extraConfig = lib.concatStringsSep "\n" (
-                        lib.concatLists (
-                          lib.mapAttrsToList (
-                            _section: values: lib.mapAttrsToList (key: value: "${key}=${value}") values
-                          ) config.systemd.settings
-                        )
+                        lib.mapAttrsToList (key: value: "${key}=${value}") managerSettings
                       );
                     };
                   }
