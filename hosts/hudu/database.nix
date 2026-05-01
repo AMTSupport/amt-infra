@@ -56,7 +56,7 @@
   };
 
   systemd.services.postgresql.postStart = ''
-    $PSQL -tA <<'EOF'
+    psql -tA <<'EOF'
       DO $$
       DECLARE password TEXT;
       BEGIN
@@ -67,7 +67,7 @@
       END $$;
     EOF
 
-    $PSQL -tAc 'ALTER DATABASE "hudu_production" OWNER TO "hudu";'
+    psql -tAc 'ALTER DATABASE "hudu_production" OWNER TO "hudu";'
   '';
 
   # Allow access to databases from podman containers
