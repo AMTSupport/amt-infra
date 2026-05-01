@@ -190,7 +190,9 @@ in
       }
 
       handle @trusted_request {
-        reverse_proxy https://jolly-mushroom-0bc4a9810.5.azurestaticapps.net
+        reverse_proxy https://jolly-mushroom-0bc4a9810.5.azurestaticapps.net {
+          header_up Host {host}
+        }
       }
     '';
   };
