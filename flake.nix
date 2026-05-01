@@ -13,7 +13,7 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     sops-nix.url = "github:Mic92/sops-nix";
     srvos.url = "github:nix-community/srvos";
     nixos-generators.url = "github:nix-community/nixos-generators";
@@ -148,9 +148,9 @@
                   enable = true;
                   package = pkgs.terraform.withPlugins (
                     p: with p; [
-                      azurerm
-                      sops
-                      digitalocean
+                      hashicorp_azurerm
+                      carlpett_sops
+                      digitalocean_digitalocean
                     ]
                   );
                 };
