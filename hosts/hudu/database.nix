@@ -21,7 +21,9 @@
   services = {
     postgresql = {
       enable = true;
-      package = pkgs.postgresql_16;
+      package = pkgs.postgresql_18;
+      extensions = ps: [ ps.pgvector ];
+
       enableTCPIP = true;
       authentication = ''
         host hudu_production hudu 10.88.0.0/16 md5

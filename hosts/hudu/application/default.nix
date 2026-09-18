@@ -54,7 +54,7 @@ in
           ONLY_SUBDOMAINS = "true";
           VALIDATION = "http";
           STAGING = "false";
-          DISABLE_SSL = "true";
+          BEHIND_TLS_PROXY = "true";
 
           DOMAIN = "hudu.amt.com.au";
           URL = "amt.com.au";
@@ -139,7 +139,25 @@ in
   services.caddy.virtualHosts."${huduDomain}" = {
     extraConfig = ''
       import caching
-      import compression
+
+      @compressed_request {
+        not path /mcp /mcp/*
+      }
+      encode @compressed_request {
+        zstd
+        gzip
+        match {
+          header Content-Type image/*
+          header Content-Type text/*
+          header Content-Type video/*
+          header Content-Type application/javascript*
+          header Content-Type application/json*
+          header Content-Type application/xml*
+          header Content-Type application/font*
+          header Content-Type application/otf*
+          header Content-Type application/ttf*
+        }
+      }
 
       import init_vars
       @trusted_request {
@@ -147,9 +165,39 @@ in
       }
 
       handle @trusted_request {
-        reverse_proxy {
-          to http://localhost:3000
-          import proxy
+        route {
+          @trusted_oauth_metadata_not_get {
+            path /.well-known/oauth-authorization-server /.well-known/oauth-protected-resource
+            not method GET
+          }
+          respond @trusted_oauth_metadata_not_get "Access denied" 403
+
+          @trusted_oauth_metadata path /.well-known/oauth-authorization-server /.well-known/oauth-protected-resource
+          request_body @trusted_oauth_metadata {
+            max_size 1KiB
+          }
+          reverse_proxy @trusted_oauth_metadata {
+            to http://localhost:3000
+            import proxy
+          }
+
+          @trusted_mcp path /mcp /mcp/*
+          reverse_proxy @trusted_mcp {
+            to http://localhost:3000
+            flush_interval -1
+            stream_timeout 3600s
+            import proxy
+
+            transport http {
+              compression off
+              response_header_timeout 3600s
+            }
+          }
+
+          reverse_proxy {
+            to http://localhost:3000
+            import proxy
+          }
         }
       }
 
