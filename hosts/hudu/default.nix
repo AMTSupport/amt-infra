@@ -14,7 +14,6 @@
   ];
 
   users.allowNoPasswordLogin = true;
-  boot.initrd.systemd.enable = lib.mkForce false;
 
   virtualisation = {
     docker.enable = lib.mkForce false;

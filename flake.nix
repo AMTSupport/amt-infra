@@ -13,7 +13,7 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     sops-nix.url = "github:Mic92/sops-nix";
     srvos.url = "github:nix-community/srvos";
     nixos-generators.url = "github:nix-community/nixos-generators";
@@ -113,6 +113,8 @@
 
               settings.global.excludes = [
                 ".envrc"
+                "AGENTS.md"
+                "**/AGENTS.md"
                 "**/secrets.yaml"
                 "**/ssh_host_ed25519_key.pub"
                 "terraform/secrets.yaml"
@@ -169,8 +171,7 @@
                 };
                 fix-byte-order-marker.enable = true;
                 mixed-line-endings.enable = true;
-                # Disabled until a new release that supports pipe-operators hits on the nixpkgs stable branch
-                nil.enable = false;
+                nil.enable = true;
                 ripsecrets = {
                   enable = true;
                   excludes = [ "users/.+/default.nix" ];

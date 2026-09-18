@@ -14,7 +14,7 @@ in
   }
   // (
     users
-    |> builtins.map (
+    |> map (
       user:
       lib.nameValuePair "${user}/WIREGUARD_PSK" {
         sopsFile = "${flake}/users/${user}/secrets.yaml";
@@ -27,13 +27,12 @@ in
   services = {
     resolved = {
       enable = true;
-      dnssec = "false";
-      llmnr = "false";
-      extraConfig = ''
-        [Resolve]
-        DNSStubListener=no
-        ReadEtcHosts=yes
-      '';
+      settings.Resolve = {
+        DNSSEC = false;
+        LLMNR = false;
+        DNSStubListener = false;
+        ReadEtcHosts = true;
+      };
     };
 
     dnsmasq = {

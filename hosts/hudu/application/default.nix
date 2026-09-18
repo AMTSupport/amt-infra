@@ -188,7 +188,7 @@ in
           lib.concatStringsSep "|" [
             "shared(_article)?/([a-zA-Z0-9]{24})"
             "secure_notes/([0-9]+)"
-            "app_assets/([a-zA-Z0-9-]+)\.(css)"
+            "app_assets/([a-zA-Z0-9-]+)\\.(css)"
           ]
         })
       }
