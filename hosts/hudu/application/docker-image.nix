@@ -1,7 +1,7 @@
 {
   imageName = "hududocker/hudu";
-  imageDigest = "sha256:4d37f15ff6e7270669120904b88bf62043eeba3dc94d2848e6ec488eea544fee";
-  hash = "sha256-b0IUYpJV1VDdAWSv0tZfbUYuw5FAFVQr1PUGfzGWoKE=";
+  imageDigest = "sha256:cd65c4ed4d7720e343f912ee0b68c1c4c5935f5e1d283d0b4a81c877c3391419";
+  hash = "sha256-RaP5GY1Fosjr/UzVJKhqUSnwaLPRxqHayrHFbDE6Wic=";
   finalImageName = "hududocker/hudu";
   finalImageTag = "latest";
 }
