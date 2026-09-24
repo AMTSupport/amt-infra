@@ -6,6 +6,12 @@
 }:
 let
   huduDomain = config.virtualisation.oci-containers.containers.hudu-app.environment.DOMAIN;
+
+  regex = {
+    sharedArticle = "shared(_article)?/([a-zA-Z0-9]{24})";
+    secureNotes = "secure_notes/([a-zA-Z0-9]{24})";
+    appAssets = "app_assets/([a-zA-Z0-9-]+)\\.(css)";
+  };
 in
 {
   sops.secrets = {
@@ -209,12 +215,12 @@ in
 
       @shared_access expression <<CEL
         ({method} == "GET"
-          && (path_regexp("^/shared(_article)?/([a-zA-Z0-9]+){24}")
-            || (path_regexp("^/secure_notes/([0-9]+)") && matches({query.key}, "^[a-zA-Z0-9]{40}$")
+          && (path_regexp("^/${regex.sharedArticle}")
+            || (path_regexp("^/${regex.secureNotes}") && matches({query.key}, "^[a-zA-Z0-9]{40}$")
         )))
 
         || ({method} == "POST"
-          && (path_regexp("^/secure_notes/([0-9]+)/reveal")))
+          && (path_regexp("^/${regex.secureNotes}/reveal")))
       CEL
 
       handle @shared_access {
@@ -234,9 +240,9 @@ in
         # Only allow requests that are coming from the shared page itself, or the css asset.
         header_regexp referer https://${huduDomain}/(${
           lib.concatStringsSep "|" [
-            "shared(_article)?/([a-zA-Z0-9]{24})"
-            "secure_notes/([0-9]+)"
-            "app_assets/([a-zA-Z0-9-]+)\\.(css)"
+            regex.sharedArticle
+            regex.secureNotes
+            regex.appAssets
           ]
         })
       }
