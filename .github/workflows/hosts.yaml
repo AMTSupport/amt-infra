@@ -31,7 +31,9 @@ jobs:
       - name: Get hosts from flake
         id: get-hosts
         run: |
-          ALL_HOSTS=$(nix flake show --no-pure-eval --json | jq -r '.nixosConfigurations | keys | .[]' | jq -R . | jq -s . || echo "[]")
+          set -euo pipefail
+
+          ALL_HOSTS=$(nix eval --json --system x86_64-linux ".#nixosConfigurations" --apply builtins.attrNames | jq -r '.[]')
           echo "All hosts from flake: $ALL_HOSTS"
           {
             echo 'matrix<<EOF'
