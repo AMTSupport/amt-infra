@@ -26,8 +26,8 @@ jobs:
 
       - name: Initialise Terraform
         working-directory: terraform
-        run: nix develop --no-pure-eval --command "terraform init -input=false"
+        run: nix develop --no-pure-eval --command terraform init -input=false -backend=false
 
       - name: Validate Terraform
         working-directory: terraform
-        run: nix develop --no-pure-eval --command "terraform validate -no-color"
+        run: nix develop --no-pure-eval --command terraform validate -no-color
