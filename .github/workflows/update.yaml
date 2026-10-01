@@ -37,10 +37,98 @@ jobs:
             accept-flake-config = true
             extra-experimental-features = nix-command flakes pipe-operators
 
+      - name: Read current Hudu digest
+        id: current-image
+        run: |
+          set -euo pipefail
+
+          digest="$(nix-instantiate --parse hosts/hudu/application/docker-image.nix --json | jq -- -r '.attrs.imageDigest.value')"
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
       - name: Update Hudu image
         run: nix run nixpkgs#nix-prefetch-docker -- --image-name "hududocker/hudu" > hosts/hudu/application/docker-image.nix
+
+      - name: Build commit message
+        id: version-change
+        env:
+          OLD_DIGEST: ${{ steps.current-image.outputs.digest }}
+        run: |
+          set -euo pipefail
+
+          new_digest="$(nix-instantiate --parse hosts/hudu/application/docker-image.nix --json | jq -- -r '.attrs.imageDigest.value')"
+          export NEW_DIGEST="${new_digest}"
+
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import re
+          import urllib.request
+
+          tags_url = "https://registry.hub.docker.com/v2/repositories/hududocker/hudu/tags?page_size=100"
+          semver_pattern = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
+
+
+          def fetch_tags() -> list[dict]:
+              tags = []
+              next_url = tags_url
+
+              try:
+                  while next_url:
+                      request = urllib.request.Request(
+                          next_url,
+                          headers = { "User-Agent": "amt-infra-update-workflow/1.0" },
+                      )
+                      with urllib.request.urlopen(request, timeout = 30) as response:
+                          payload = json.load(response)
+
+                      tags.extend(payload["results"])
+                      next_url = payload.get("next")
+              except Exception:
+                  return []
+
+              return tags
+
+
+          def version_for_digest(tags: list[dict], digest: str) -> str | None:
+              versions = []
+
+              for tag in tags:
+                  name = tag.get("name", "")
+                  match = semver_pattern.fullmatch(name)
+                  if not match:
+                      continue
+
+                  images = tag.get("images") or []
+                  digests = { tag.get("digest") }
+                  digests.update(image.get("digest") for image in images)
+                  if digest in digests:
+                      versions.append(tuple(int(part) for part in match.groups()))
+
+              if not versions:
+                  return None
+
+              return ".".join(str(part) for part in max(versions))
+
+
+          def display_version(digest: str, version: str | None) -> str:
+              return version or digest[:19]
+
+
+          old_digest = os.environ["OLD_DIGEST"]
+          new_digest = os.environ["NEW_DIGEST"]
+          tags = fetch_tags()
+
+          old_version = display_version(old_digest, version_for_digest(tags, old_digest))
+          new_version = display_version(new_digest, version_for_digest(tags, new_digest))
+          message = f"chore(docker-image): {old_version} -> {new_version}"
+
+          print(f"oldVersion={old_version}")
+          print(f"newVersion={new_version}")
+          print(f"message={message}")
+          PY
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
         with:
           add: "hosts/hudu/application/docker-image.nix"
+          message: ${{ steps.version-change.outputs.message }}
